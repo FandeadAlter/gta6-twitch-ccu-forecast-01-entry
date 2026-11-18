@@ -64,6 +64,15 @@ HOURS = list(range(2, 25))
 # comparison that chose it).
 SPREAD = "lognormal"
 
+# Conformal calibration of the live-regime lognormal spread only (see
+# ~/workspace/makefun/gta-loo-exp/RESULTS.md, Exp. 1): LOO says the
+# shipped spread is systematically ~30% too narrow (coverage 0.808 vs
+# nominal 0.90), so sigma is scaled by a fixed 1.30. LOO pinball
+# 0.3015 -> 0.2978, coverage 0.808 -> 0.902. Per-target multipliers and
+# additive CQR were rejected by the same experiment, as was hierarchical
+# shrinkage. The not-live raw fallback is untouched by this.
+SIGMA_MULT = 1.30
+
 # Hour-1 channels at or above this mean the launch was already live at
 # hour 1 (rolling midnight unlock / early access). Kit data: not-yet-live
 # launches have at most 126 channels at hour 1, live ones at least 210.
@@ -252,7 +261,7 @@ def spread_log_quantiles(items, spread):
             q25 = weighted_quantile(pairs, 0.25)
             q75 = weighted_quantile(pairs, 0.75)
             sigma = (q75 - q25) / 1.349
-            sigmas.append(min(1.5, max(0.05, sigma)))
+            sigmas.append(min(1.5, max(0.05, sigma)) * SIGMA_MULT)
         sig_s = moving_average_3(sigmas)
         for h, sigma in zip(HOURS, sig_s):
             out[h] = [med_s[h] + z * sigma for z in Z]

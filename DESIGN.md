@@ -279,3 +279,21 @@ dan spread lognormal sedikit lebih lebar).
 - `eval_loo.py` — harness LOO + uji asap fallback. Jalankan:
   `python3 eval_loo.py`.
 
+### 7.7 Kalibrasi conformal (perubahan pasca-Step 2, 2026-11-17)
+
+Eksperimen LOO offline (`~/workspace/makefun/gta-loo-exp/RESULTS.md`,
+Exp. 1) menemukan spread live sistematis ~30% terlalu sempit
+(coverage 0,808 vs nominal 0,90). Diterapkan: pengali sigma tetap
+`SIGMA_MULT = 1,30` pada cabang lognormal rezim live saja
+(satu baris di `spread_log_quantiles`); fallback tidak-live tidak
+diubah; pengali per-target dan koreksi CQR aditif ditolak, begitu pula
+shrinkage hierarkis (Exp. 2, ditolak di semua bobot).
+
+Verifikasi dengan `eval_loo.py` atas `main.py` yang sudah diubah
+(mereproduksi angka eksperimen dengan tepat):
+rolling lognormal 0,3015 → **0,2978**, coverage 0,81 → **0,90**;
+semua launch 0,6608 → **0,6564**, coverage 0,76 → 0,85.
+Typical miss tidak berubah (59,2%) — median tidak disentuh, sesuai
+harapan. Format output dicek ulang: 4 practice case tetap valid
+(1.436–1.560 byte).
+
